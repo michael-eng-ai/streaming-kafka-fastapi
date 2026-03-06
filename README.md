@@ -1,64 +1,66 @@
-# ⚡ Real-Time Streaming Radar
+# Real-Time Streaming Radar
 
 ![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 
-Este projeto demonstra a construção corporativa de uma arquitetura de dados orientada a eventos (*Event-Driven*) para ambientes de alta vazão (Real-Time Streaming). Todo o ecossistema é agnóstico à nuvem e encapsulado via microsserviços do **Docker**.
+Este projeto implementa e documenta uma arquitetura de dados corporativa estritamente orientada a eventos (Event-Driven Architecture) padronizada para contextos reais envolvendo alta volumetria distribuída (Real-Time Streaming). A integralidade tecnológica presente no ecossistema comporta-se de forma estritamente modular, mantida integralmente conteinerizada por meio do padrão de orquestração Docker.
 
-## 🏗️ Arquitetura dos Microsserviços
+## Modelagem dos Microsserviços
 
-O pipeline é comporto por 6 containers rodando em uma rede selada (`streaming-net`):
+O pipeline encontra-se devidamente segmentado e distribuído em 6 sub-sistemas independentes e comunicantes entre a sub-rede estrita e padronizada (`streaming-net`):
 
-1. **Broker Principal (`kafka` & `zookeeper`)**: O coração da mensageria (usando as imagens oficiais da Confluent). Mantém os tópicos vivos e garante a resiliência dos pacotes não consumidos.
-2. **Python Producer (`python-producer`)**: Um script autônomo que simula um websocket/crawling financeiro. Ele emite "ticks" aleatórios de preço do mercado de ações a cada 1 segundo diretamente em um tópico (`market-ticks`).
-3. **Python Consumer (`python-consumer`)**: Um *Worker* que processa a fila infinita do Kafka e age como intermediário (ETL in-stream). Ele pega o binário do Kafka e faz um Upsert veloz em chaves de estado de um banco em-memória.
-4. **Fast Storage (`redis`)**: Atua como a camada de *Serving* (Layer de Velocidade / Arquitetura Lambda). O Redis mantem o *State* transacional mais recente (`ticker:AAPL`) calculável em `O(1)`.
-5. **API Client (`fastapi-app`)**: Uma API RESTful moderna baseada no padrão ASGI que consulta o cluster do Redis respondendo aos consumidores finais Web em baixíssima latência (milissegundos), poupando o banco de dados analítico de pancadas.
-6. **Interface de Observabilidade (`kafka-ui`)**: Um painel Web gráfico provido pela Provectus para monitorar a saúde do broker e inspecionar mensagens trafegando ao vivo.
+1. **Broker Principal (`kafka` & `zookeeper`)**: O núcleo resiliente de distribuição pautado nas imagens consolidadas pela entidade provedora Confluent, coordenando de forma redundante e estrita as matrizes assíncronas de fluxos mantidas de forma lógica em tópicos.
+2. **Python Producer (`python-producer`)**: Interface de injeção ponta a ponta configurada autonomamente, produzindo carga analítica e financeira de mercado. Emitindo ocorrências estritas a título de cotação temporal em fluxo persistente voltado para a instância transacional configurada (`market-ticks`).
+3. **Python Consumer (`python-consumer`)**: Aplicação distribuída orientada de forma estrita para tratamento e extração in-stream assíncrona base. Transaciona os binários capturados em interface conectada com instâncias de banco temporal operante (cálculo vetorial da aplicação).
+4. **Sessões e Memória de Serving (`redis`)**: Opera nativamente compondo a estrutura matricial da *Speed Layer* fundamentada globalmente na infraestrutura formal de arquiteturas lógicas tipo Lambda/Kappa. Garante que os registros primários de cálculo da camada anterior contem com estabilização temporal e cálculo algorítmico em nível ótimo transacional (`O(1)`).
+5. **Aplicação Final API (`fastapi-app`)**: Interface construída provendo e assegurando integração RESTful a camada assíncrona orientada via requisição global sobre os nós provisionados. Proporciona atendimento a requisições com latência aferida em índices compatíveis e escaláveis.
+6. **Interface de Observabilidade (`kafka-ui`)**: Monitor visual contido, utilizado amplamente no dimensionamento infraestrutural do gerenciamento ativo sobre tópicos, brokers atrelados e partições estruturadas.
 
 ---
 
-## 🚀 Como Subir o Projeto (One-Click Deploy)
+## Deployment Local Integrado (Containerização)
 
-Você **não precisa intalar nada** além do Docker na sua máquina. O Dockerfile dos microsserviços vai abstrair as bibliotecas do Python.
+A arquitetura encontra-se plenamente aliviada de dependências sistemáticas colaterais, fundamentando seu fluxo operacional de setup no utilitário de mercado Docker.
 
 ```bash
-# Baixe o repositório
+# Implantação e Transição Sistemática Inicial
 git clone https://github.com/michael-eng-ai/streaming-kafka-fastapi.git
 cd streaming-kafka-fastapi
 
-# Construa as imagens Python e suba os 6 containers atrelados na rede
+# Renderização Base do Workflow Integrado
 docker compose up --build -d
 ```
 
-### 🔍 Monitorando o Sistema
+### Observabilidade Base
 
-Acompanhe os logs dos serviços Python para ver a produção e consumo de ponta a ponta ocorrendo:
+Em seções transacionais, os subprodutos comportamentais emitidos através dos Microsserviços Python acoplados devem ser monitorados pelas bibliotecas integradas na esteira dos Containers do Pipeline:
 ```bash
-# Ver os ticks sendo criados pelo producer a cada segundo
+# Fluxo de Inspeção Produtora a nível Kernel
 docker logs python-producer -f
 
-# Ver os ticks sendo salvos massivamente no Redis pelo consumer
+# Fluxo de Inspeção Processual Analítica a nível Kernel
 docker logs python-consumer -f
 ```
 
-## 🌐 Endpoints Disponíveis (Como Consumir a API)
+## Integregação Pública Externa (REST Endpoints)
 
-A FastAPI expõe a documentação auto-gerada do *Swagger* (OpenAPI). 
-Com o cluster no ar, acesse no seu navegador local:
+A API provê integração estrutural pautada via Swagger (compatível com os frameworks estritos da especificação padrão do OpenAPI). 
 
-- 📖 **Documentação Oficial (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
-- 📈 **Recuperar o Preço em Tempo Real:** `GET http://localhost:8000/api/v1/ticker/{symbol}` (Ex: `BTC-USD`, `AAPL`, `TSLA`).
-- 🕰️ **Recuperar Histórico de Janela Redes:** `GET http://localhost:8000/api/v1/history/{symbol}`.
+Acesse os direcionamentos listados sob a host sub-provida local:
 
-### Painel do Cluster Kafka
-- 🎛️ **Kafka UI Manger:** [http://localhost:8080/](http://localhost:8080/) (Interface de gestão de brokers/tópicos).
+- **Documentação Formal Sistêmica (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Aferição Estrutural Temporal:** `GET http://localhost:8000/api/v1/ticker/{symbol}` (Especificação Simbólica Ex: `BTC-USD`, `AAPL`, `TSLA`).
+- **Recuperação Categórica de Amostragem Janelada:** `GET http://localhost:8000/api/v1/history/{symbol}`.
+
+### Utilitário Concorrente (Cluster Kafka Management)
+- **Kafka UI Manager Interface:** [http://localhost:8080/](http://localhost:8080/) (Interface Web).
 
 ---
 
-## 🧹 Encerrando o Cluster
+## Encerramento da Arquitetura Analítica Local
 
+Para desassociação governada das redes e processos temporais isolados:
 ```bash
 docker compose down --volumes
 ```
 
-> *Desenvolvido para evidenciar a governança sobre tópicos/streaming, a separação modular de responsabilidades em Workers escaláveis e entrega via modelo de Arquitetura de Microsserviços.*
+> *Construção modelada formalmente à comprovação em padrões analíticos industriais com garantia global aplicável, modularidade de Microsserviços e resiliência governada de falha por desacoplamento comunicativo.*
