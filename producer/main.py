@@ -2,7 +2,13 @@ import sys
 import json
 import time
 import random
+import logging
+from typing import List, Dict, Any, Optional
 from confluent_kafka import Producer
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Configuration
 KAFKA_BROKER = 'localhost:9092'
@@ -16,14 +22,14 @@ conf = {
 
 producer = Producer(conf)
 
-def delivery_report(err, msg):
+def delivery_report(err: Optional[str], msg: Any) -> None:
     """ Called once for each message produced to indicate delivery result. """
     if err is not None:
-        print(f"❌ Message delivery failed: {err}")
+        logger.error(f"Message delivery failed: {err}")
     else:
-        print(f"✅ Message delivered to {msg.topic()} [{msg.partition()}]")
+        logger.info(f"Message delivered to {msg.topic()} [{msg.partition()}]")
 
-def fetch_market_data():
+def fetch_market_data() -> List[Dict[str, Any]]:
     """ 
     Simulates extracting real-time ticker string data from a financial API 
     (e.g., Binance WebSockets or Yahoo Finance API).
@@ -47,10 +53,10 @@ def fetch_market_data():
     
     return data
 
-def run_producer():
-    print(f"🚀 Starting Kafka Producer on {KAFKA_BROKER}")
-    print(f"📡 Publishing to topic: {TOPIC_NAME}")
-    print("Press Ctrl+C to exit...\n")
+def run_producer() -> None:
+    logger.info(f"Starting Kafka Producer on {KAFKA_BROKER}")
+    logger.info(f"Publishing to topic: {TOPIC_NAME}")
+    logger.info("Press Ctrl+C to exit...")
     
     try:
         while True:
@@ -76,10 +82,13 @@ def run_producer():
             time.sleep(1)
             
     except KeyboardInterrupt:
-        print("\n⏹️ Stopping Producer...")
+        logger.info("Stopping Producer...")
+    except Exception as e:
+        logger.exception("An unexpected error occurred in the producer loop.")
+        raise
     finally:
         # Espera mensagens flutuantes serem escoadas antes de desligar
-        print("⏳ Flushing remaining messages...")
+        logger.info("Flushing remaining messages...")
         producer.flush(timeout=5.0)
 
 if __name__ == '__main__':
